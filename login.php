@@ -1,29 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+<?php
+$host = 'localhost';
+$user = 'user';
+$pass = '';
+$db = 'mydatabase';
 
-    <form method="post">
-        <input type="text" name="username" placeholder="Enter your name"/> <br>
-        <input type="password" name="password" placeholder="Enter your password"/> <br>
-        <input type="submit" name="submitbtn">
-    </form>
+$conn = mysqli_connect($host, $user, $pass, $db);
+if (!$conn) {
+    die('Connection Failed: ' . mysqli_connect_error());
+}
+echo 'Connected Successfully<br>';
+$tableCreationQuery = "
+CREATE TABLE IF NOT EXISTS simple (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+)";
+if (!mysqli_query($conn, $tableCreationQuery)) {
+    die('Error Creating Table: ' . mysqli_error($conn));
+}
+echo "Table is Ready.<br>";
+$name = "Yashvi"; 
 
-    <?php
-    if (isset($_POST["submitbtn"])) {
-        if (isset($_POST["username"]) && isset($_POST["password"])) {
-            $username = $_POST["username"];
-            $password = $_POST["password"];
 
-            echo "The name of the user is $username";
-            echo "<br> The password of the user is $password";
-        }
-    }
-    ?>
-    
-</body>
-</html>
+$stmt = $conn->prepare("INSERT INTO simple (name) VALUES (?)");
+if (!$stmt) {
+    die("Prepare failed: " . $conn->error);
+}
+$stmt->bind_param("s", $name); 
+
+if ($stmt->execute()) {
+    echo "Data inserted successfully.<br>";
+} else {
+    echo "Error inserting data: " . $stmt->error;
+}
+
+$stmt->close();
+
+?>
